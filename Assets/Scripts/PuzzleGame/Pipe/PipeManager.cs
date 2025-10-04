@@ -42,6 +42,13 @@ public class PipeManager : MonoBehaviour
             }
         }
 
+        // 随机挑一个 pipe 可拖拽
+        int randRow = Random.Range(0, _level.Row);
+        int randCol = Random.Range(0, _level.Column);
+        pipes[randRow, randCol].IsDraggable = true;
+
+        SpawnExternalPipe();
+
         Camera.main.orthographicSize = Mathf.Max(_level.Row, _level.Column) + 2f;
         Vector3 cameraPos = Camera.main.transform.position;
         cameraPos.x = _level.Column * 0.5f;
@@ -55,19 +62,25 @@ public class PipeManager : MonoBehaviour
     {
         if (hasGameFinished) return;
 
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        int row = Mathf.FloorToInt(mousePos.y);
-        int col = Mathf.FloorToInt(mousePos.x);
-        if (row < 0 || col < 0) return;
-        if (row >= _level.Row) return;
-        if (col >= _level.Column) return;
+        //Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //int row = Mathf.FloorToInt(mousePos.y);
+        //int col = Mathf.FloorToInt(mousePos.x);
+        //if (row < 0 || col < 0) return;
+        //if (row >= _level.Row) return;
+        //if (col >= _level.Column) return;
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            pipes[row, col].UpdateInput();
-            StartCoroutine(ShowHint());
-        }
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    pipes[row, col].UpdateInput();
+        //    StartCoroutine(ShowHint());
+        //}
     }
+
+    public IEnumerator ShowHintWrapper()
+    {
+        yield return StartCoroutine(ShowHint());
+    }
+
 
     private IEnumerator ShowHint()
     {
@@ -149,6 +162,21 @@ public class PipeManager : MonoBehaviour
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 
-    
+    public Pipe externalPipePrefab;  // 外部候选管子预制体
+    private Pipe externalPipe;
+
+    public void SpawnExternalPipe()
+    {
+        // 计算生成位置：棋盘右边居中
+        float spawnX = _level.Column + 2f;      // 棋盘宽度右边再偏移 2 个单位
+        float spawnY = _level.Row * 0.5f;       // 棋盘高度的一半（居中）
+
+        Vector2 spawnPos = new Vector2(spawnX, spawnY);
+
+        // 实例化候选管子
+        externalPipe = Instantiate(externalPipePrefab, spawnPos, Quaternion.identity);
+        externalPipe.IsDraggable = true;  // 必须能拖动
+    }
+
 
 }
