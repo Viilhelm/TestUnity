@@ -1250,7 +1250,7 @@ GameObject:
   - component: {fileID: 1458451504}
   - component: {fileID: 1458451505}
   m_Layer: 0
-  m_Name: PipeManger
+  m_Name: PipeManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1285,6 +1285,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _level: {fileID: 11400000, guid: 8bd80b2a85ae1664088844f41b73744b, type: 2}
   _cellPrefab: {fileID: 8570145710800655449, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
+<<<<<<< Updated upstream
+=======
+  externalPipePrefab: {fileID: 8570145710800655449, guid: 585a5dba0757ca2408f13f1e93f312dc, type: 3}
+  externalFixedType: 4
+>>>>>>> Stashed changes
 --- !u!1 &1471786820
 GameObject:
   m_ObjectHideFlags: 0
