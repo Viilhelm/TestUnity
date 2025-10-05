@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class Pipe : MonoBehaviour
 {
-    [HideInInspector] public bool IsDraggable = false;
-
     [HideInInspector] public bool IsFilled;
     [HideInInspector] public int PipeType;
 
