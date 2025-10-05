@@ -1285,6 +1285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _level: {fileID: 11400000, guid: 8bd80b2a85ae1664088844f41b73744b, type: 2}
   _cellPrefab: {fileID: 8570145710800655449, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
+  externalPipePrefab: {fileID: 8570145710800655449, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
 --- !u!1 &1471786820
 GameObject:
   m_ObjectHideFlags: 0

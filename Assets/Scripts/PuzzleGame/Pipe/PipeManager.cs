@@ -21,10 +21,14 @@ public class PipeManager : MonoBehaviour
         SpawnLevel();
     }
 
+    //加一个二维布尔数组 hasPipe 来记录哪个格子里有管子
+    private bool[,] hasPipe;
+
     private void SpawnLevel()
     {
         pipes = new Pipe[_level.Row, _level.Column];
         startPipes = new List<Pipe>();
+        hasPipe = new bool[_level.Row, _level.Column];
 
         for (int i = 0; i < _level.Row; i++)
         {
@@ -34,7 +38,16 @@ public class PipeManager : MonoBehaviour
                 Pipe tempPipe = Instantiate(_cellPrefab);
                 tempPipe.transform.position = spawnPos;
                 tempPipe.Init(_level.Data[i * _level.Column + j]);
+
                 pipes[i, j] = tempPipe;
+                hasPipe[i, j] = true;  // 生成时占满
+
+                // 只有第一行第四列 (row=0, col=3) 可以拖拽
+                if (i == _level.Row - 1 && j == 3)
+                    tempPipe.IsDraggable = true;
+                else
+                    tempPipe.IsDraggable = false;
+
                 if (tempPipe.PipeType == 1)
                 {
                     startPipes.Add(tempPipe);
@@ -46,6 +59,7 @@ public class PipeManager : MonoBehaviour
         int randRow = Random.Range(0, _level.Row);
         int randCol = Random.Range(0, _level.Column);
         pipes[randRow, randCol].IsDraggable = true;
+        hasPipe[randRow, randCol] = false; // 拖走后这个格子空
 
         SpawnExternalPipe();
 
@@ -55,8 +69,10 @@ public class PipeManager : MonoBehaviour
         cameraPos.y = _level.Row * 0.5f;
         Camera.main.transform.position = cameraPos;
 
+
         StartCoroutine(ShowHint());
     }
+
 
     private void Update()
     {
@@ -89,6 +105,7 @@ public class PipeManager : MonoBehaviour
         CheckWin();
     }
 
+
     private void CheckFill()
     {
         for (int i = 0; i < _level.Row; i++)
@@ -96,6 +113,7 @@ public class PipeManager : MonoBehaviour
             for (int j = 0; j < _level.Column; j++)
             {
                 Pipe tempPipe = pipes[i, j];
+                if (tempPipe == null) continue;
                 if (tempPipe.PipeType != 0)
                 {
                     tempPipe.IsFilled = false;
@@ -113,20 +131,21 @@ public class PipeManager : MonoBehaviour
         while (check.Count > 0)
         {
             Pipe pipe = check.Dequeue();
+            if (pipe == null || finished.Contains(pipe)) continue;
             finished.Add(pipe);
+
             List<Pipe> connected = pipe.ConnectedPipes();
             foreach (var connectedPipe in connected)
             {
-                if (!finished.Contains(connectedPipe))
-                {
+                if (connectedPipe != null && !finished.Contains(connectedPipe))
                     check.Enqueue(connectedPipe);
-                }
             }
         }
 
         foreach (var filled in finished)
         {
-            filled.IsFilled = true;
+            if (filled != null) filled.IsFilled = true;
+
         }
 
         for (int i = 0; i < _level.Row; i++)
@@ -134,7 +153,7 @@ public class PipeManager : MonoBehaviour
             for (int j = 0; j < _level.Column; j++)
             {
                 Pipe tempPipe = pipes[i, j];
-                tempPipe.UpdateFilled();
+                if (tempPipe != null) tempPipe.UpdateFilled();
             }
         }
 
@@ -146,7 +165,8 @@ public class PipeManager : MonoBehaviour
         {
             for (int j = 0; j < _level.Column; j++)
             {
-                if (!pipes[i, j].IsFilled)
+                Pipe tempPipe = pipes[i, j];
+                if (tempPipe == null || !tempPipe.IsFilled)
                     return;
             }
         }
@@ -175,7 +195,47 @@ public class PipeManager : MonoBehaviour
 
         // 实例化候选管子
         externalPipe = Instantiate(externalPipePrefab, spawnPos, Quaternion.identity);
+        // 随机初始化一个管子（0~6）
+        int pipeType = Random.Range(0, 7);
+        externalPipe.Init(pipeType);
         externalPipe.IsDraggable = true;  // 必须能拖动
+    }
+
+    // 判断格子是否在棋盘内
+    public bool IsInsideBoard(int row, int col)
+    {
+        return row >= 0 && row < _level.Row && col >= 0 && col < _level.Column;
+    }
+
+    // 判断格子是否空
+    public bool IsEmptyAt(int row, int col)
+    {
+        return !hasPipe[row, col];
+    }
+
+    // 把管子放进某个格子
+    public void PlacePipeAt(Pipe pipe, int row, int col)
+    {
+        pipes[row, col] = pipe;
+        hasPipe[row, col] = true;
+        pipe.transform.position = new Vector3(col + 0.5f, row + 0.5f, 0);
+    }
+
+    public void ClearPipeAt(int row, int col)
+    {
+        pipes[row, col] = null;
+        hasPipe[row, col] = false;
+    }
+
+    public void WorldToCell(Vector3 worldPos, out int row, out int col)
+    {
+        row = Mathf.RoundToInt(worldPos.y - 0.5f);
+        col = Mathf.RoundToInt(worldPos.x - 0.5f);
+    }
+
+    public Vector2 GetCellCenter(int row, int col)
+    {
+        return new Vector2(col + 0.5f, row + 0.5f);
     }
 
 

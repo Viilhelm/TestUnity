@@ -56,17 +56,21 @@ public class Pipe : MonoBehaviour
         {
             connectBoxes.Add(currentPipe.GetChild(i));
         }
+
+        UpdateFilled();
     }
 
     public void UpdateInput()
     {
         if (PipeType == 0 || PipeType == 1 || PipeType == 2)
-        {
             return;
-        }
 
         rotation = (rotation + 1) % (maxRotation + 1);
         currentPipe.transform.eulerAngles = new Vector3(0, 0, rotation * rotationMultiplier);
+
+        // 旋转后立即刷新连通
+        if (PipeManager.Instance != null)
+            PipeManager.Instance.StartCoroutine(PipeManager.Instance.ShowHintWrapper());
     }
 
     public void UpdateFilled()
@@ -97,7 +101,7 @@ public class Pipe : MonoBehaviour
                 if (target == null) continue;
 
                 Pipe pipe = target.GetComponent<Pipe>();
-                if (pipe != null)
+                if (pipe != null && pipe != this)
                 {
                     result.Add(pipe);
                 }
@@ -106,4 +110,6 @@ public class Pipe : MonoBehaviour
 
         return result;
     }
+
+
 }
