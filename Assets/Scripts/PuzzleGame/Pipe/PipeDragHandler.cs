@@ -17,10 +17,8 @@ public class PipeDragHandler : MonoBehaviour
 
     private void Update()
     {
-        // 如果管子不允许拖拽 → 只允许旋转，不进入拖拽逻辑
         if (!pipe.IsDraggable)
         {
-            // 左键旋转依然可用
             if (Input.GetMouseButtonDown(0))
             {
                 Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -30,13 +28,13 @@ public class PipeDragHandler : MonoBehaviour
                 if (hit.collider != null && hit.collider.gameObject == gameObject)
                 {
                     pipe.UpdateInput();
-                    _ = PipeManager.Instance.ShowHintWrapper();
+                    if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
+                        _ = PipeManager.Instance.ShowHintWrapper();
                 }
             }
             return;
         }
 
-        // ---------------- 左键旋转 ----------------
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -46,7 +44,8 @@ public class PipeDragHandler : MonoBehaviour
             if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
                 pipe.UpdateInput();
-                _ = PipeManager.Instance.ShowHintWrapper();
+                if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
+                    _ = PipeManager.Instance.ShowHintWrapper();
             }
         }
 
@@ -67,23 +66,28 @@ public class PipeDragHandler : MonoBehaviour
                 startedFromBoard = PipeManager.Instance.IsInsideBoard(row, col);
                 clearedFromBoard = false;
 
-                // 如果从棋盘拖起 → 清空格子
+                // 如果从棋盘拖起 → 清空格子 + 隐藏背景
                 if (startedFromBoard && !clearedFromBoard)
                 {
                     PipeManager.Instance.ClearPipeAt(row, col);
                     clearedFromBoard = true;
+
+                    // 找到背景子物体并隐藏
+                    Transform background = transform;
+                    SpriteRenderer sr = background.GetComponent<SpriteRenderer>();
+                    if (sr != null) sr.enabled = false;
                 }
             }
         }
 
-        // ---------------- 右键拖拽中 ----------------
+
         if (isDragging && Input.GetMouseButton(1))
         {
             Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             transform.position = mouseWorld + offset;
         }
 
-        // ---------------- 右键松开 ----------------
+
         if (isDragging && Input.GetMouseButtonUp(1))
         {
             Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -92,19 +96,25 @@ public class PipeDragHandler : MonoBehaviour
             if (PipeManager.Instance.IsInsideBoard(row, col) &&
                 PipeManager.Instance.IsEmptyAt(row, col))
             {
-                // 成功放置
+
                 PipeManager.Instance.PlacePipeAt(pipe, row, col);
-                _ = PipeManager.Instance.ShowHintWrapper();
+                if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
+                    _ = PipeManager.Instance.ShowHintWrapper();
             }
             else
             {
-                // 放置失败
-                if (!startedFromBoard)
+
+                if (startedFromBoard)
                 {
-                    // 候选管子 → 回原位
+                    // 棋盘里拖出来的 → 放到固定位置
+                    transform.position = PipeManager.Instance.externalDropPos;
+                }
+                else
+                {
+                    // 外部候选 pipe → 回到自己的起始位置
                     transform.position = startPosition;
                 }
-                // 如果是棋盘里拖出来的 → 保持当前位置（允许留在外部）
+
             }
 
             isDragging = false;

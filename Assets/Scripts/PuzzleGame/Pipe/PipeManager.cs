@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class PipeManager : MonoBehaviour
@@ -55,11 +56,6 @@ public class PipeManager : MonoBehaviour
             }
         }
 
-        // 随机挑一个 pipe 可拖拽
-        int randRow = Random.Range(0, _level.Row);
-        int randCol = Random.Range(0, _level.Column);
-        pipes[randRow, randCol].IsDraggable = true;
-        hasPipe[randRow, randCol] = false; // 拖走后这个格子空
 
         SpawnExternalPipe();
 
@@ -183,6 +179,7 @@ public class PipeManager : MonoBehaviour
     }
 
     public Pipe externalPipePrefab;  // 外部候选管子预制体
+    public int externalFixedType = 4;
     private Pipe externalPipe;
 
     public void SpawnExternalPipe()
@@ -195,10 +192,10 @@ public class PipeManager : MonoBehaviour
 
         // 实例化候选管子
         externalPipe = Instantiate(externalPipePrefab, spawnPos, Quaternion.identity);
-        // 随机初始化一个管子（0~6）
-        int pipeType = Random.Range(0, 7);
+
+        int pipeType = Mathf.Clamp(externalFixedType, 0, 6); // 固定样式
         externalPipe.Init(pipeType);
-        externalPipe.IsDraggable = true;  // 必须能拖动
+        externalPipe.IsDraggable = true;
     }
 
     // 判断格子是否在棋盘内
@@ -214,11 +211,25 @@ public class PipeManager : MonoBehaviour
     }
 
     // 把管子放进某个格子
-    public void PlacePipeAt(Pipe pipe, int row, int col)
+    public void PlacePipeAt(Pipe dragged, int row, int col)
     {
-        pipes[row, col] = pipe;
+        // 记录被拖动物件的管型与朝向
+        int type = dragged.PipeType;
+        int rot = dragged.GetRotationIndex();
+
+        // 在目标格生成一个“正式 cell”
+        Pipe newCell = Instantiate(_cellPrefab);
+        newCell.transform.position = new Vector3(col + 0.5f, row + 0.5f, 0);
+        newCell.Init(type);          // 按管型初始化
+        newCell.SetRotationIndex(rot); // 还原旋转
+        newCell.IsDraggable = false;   // 放回棋盘后不再可拖
+
+        // 写回棋盘数据
+        pipes[row, col] = newCell;
         hasPipe[row, col] = true;
-        pipe.transform.position = new Vector3(col + 0.5f, row + 0.5f, 0);
+
+        // 销毁“只有管子”的外部件
+        Destroy(dragged.gameObject);
     }
 
     public void ClearPipeAt(int row, int col)
@@ -237,6 +248,8 @@ public class PipeManager : MonoBehaviour
     {
         return new Vector2(col + 0.5f, row + 0.5f);
     }
+
+    public Vector2 externalDropPos = new Vector2(12, -2);
 
 
 }

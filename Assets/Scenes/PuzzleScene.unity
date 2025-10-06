@@ -1285,7 +1285,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _level: {fileID: 11400000, guid: 8bd80b2a85ae1664088844f41b73744b, type: 2}
   _cellPrefab: {fileID: 8570145710800655449, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
-  externalPipePrefab: {fileID: 8570145710800655449, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
+  externalPipePrefab: {fileID: 8570145710800655449, guid: 585a5dba0757ca2408f13f1e93f312dc, type: 3}
+  externalFixedType: 4
+  externalDropPos: {x: 12, y: -2}
 --- !u!1 &1471786820
 GameObject:
   m_ObjectHideFlags: 0

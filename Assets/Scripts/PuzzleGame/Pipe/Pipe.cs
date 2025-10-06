@@ -112,4 +112,13 @@ public class Pipe : MonoBehaviour
     }
 
 
+    public int GetRotationIndex() { return rotation; }
+
+    public void SetRotationIndex(int rot)
+    {
+        rotation = ((rot % (maxRotation + 1)) + (maxRotation + 1)) % (maxRotation + 1);
+        if (currentPipe != null)
+            currentPipe.transform.eulerAngles = new Vector3(0, 0, rotation * rotationMultiplier);
+    }
+
 }
