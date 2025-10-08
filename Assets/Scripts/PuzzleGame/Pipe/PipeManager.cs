@@ -67,6 +67,21 @@ public class PipeManager : MonoBehaviour
 
 
         StartCoroutine(ShowHint());
+
+        // 强制刷新一次所有管子的接口状态
+        for (int i = 0; i < _level.Row; i++)
+        {
+            for (int j = 0; j < _level.Column; j++)
+            {
+                Pipe tempPipe = pipes[i, j];
+                if (tempPipe != null) tempPipe.RefreshInput();
+            }
+        }
+
+        // 然后立刻检查一次填充
+        CheckFill();
+        CheckWin();
+
     }
 
 
@@ -230,6 +245,9 @@ public class PipeManager : MonoBehaviour
 
         // 销毁“只有管子”的外部件
         Destroy(dragged.gameObject);
+
+        if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
+            _ = StartCoroutine(ShowHint());
     }
 
     public void ClearPipeAt(int row, int col)
@@ -250,6 +268,14 @@ public class PipeManager : MonoBehaviour
     }
 
     public Vector2 externalDropPos = new Vector2(12, -2);
+
+    public Pipe GetPipe(int row, int col)
+    {
+        if (IsInsideBoard(row, col))
+            return pipes[row, col];
+        return null;
+    }
+
 
 
 }

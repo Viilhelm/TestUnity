@@ -29,7 +29,7 @@ public class PipeDragHandler : MonoBehaviour
                 {
                     pipe.UpdateInput();
                     if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
-                        _ = PipeManager.Instance.ShowHintWrapper();
+                        _ = PipeManager.Instance.StartCoroutine(PipeManager.Instance.ShowHintWrapper());
                 }
             }
             return;
@@ -45,7 +45,7 @@ public class PipeDragHandler : MonoBehaviour
             {
                 pipe.UpdateInput();
                 if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
-                    _ = PipeManager.Instance.ShowHintWrapper();
+                    _ = PipeManager.Instance.StartCoroutine(PipeManager.Instance.ShowHintWrapper());
             }
         }
 
@@ -76,6 +76,9 @@ public class PipeDragHandler : MonoBehaviour
                     Transform background = transform;
                     SpriteRenderer sr = background.GetComponent<SpriteRenderer>();
                     if (sr != null) sr.enabled = false;
+
+                    pipe.IsFilled = false;
+                    pipe.UpdateFilled();
                 }
             }
         }
@@ -85,6 +88,14 @@ public class PipeDragHandler : MonoBehaviour
         {
             Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             transform.position = mouseWorld + offset;
+
+            // 只在棋盘范围内时更新
+            PipeManager.Instance.WorldToCell(mouseWorld, out int row, out int col);
+            if (PipeManager.Instance.IsInsideBoard(row, col))
+            {
+                if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
+                    _ = PipeManager.Instance.StartCoroutine(PipeManager.Instance.ShowHintWrapper());
+            }
         }
 
 
@@ -99,7 +110,7 @@ public class PipeDragHandler : MonoBehaviour
 
                 PipeManager.Instance.PlacePipeAt(pipe, row, col);
                 if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
-                    _ = PipeManager.Instance.ShowHintWrapper();
+                    _ = PipeManager.Instance.StartCoroutine(PipeManager.Instance.ShowHintWrapper());
             }
             else
             {

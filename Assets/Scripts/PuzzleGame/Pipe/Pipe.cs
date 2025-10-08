@@ -80,32 +80,96 @@ public class Pipe : MonoBehaviour
         filledSprite.gameObject.SetActive(IsFilled);
     }
 
-    public List<Pipe> ConnectedPipes()
+    //public List<Pipe> ConnectedPipes()
+    //{
+    //    List<Pipe> result = new List<Pipe>();
+
+    //    foreach (var box in connectBoxes)
+    //    {
+    //        RaycastHit2D[] hit = Physics2D.RaycastAll(box.transform.position, Vector2.zero, 0.1f);
+    //        Debug.Log($"{name} connectBox at {box.position}");
+    //        //for (int i = 0; i < hit.Length; i++)
+    //        //{
+    //        //    result.Add(hit[i].collider.transform.parent.parent.GetComponent<Pipe>());
+    //        //}
+    //        for (int i = 0; i < hit.Length; i++)
+    //        {
+    //            if (hit[i].collider == null) continue;
+
+    //            Transform t = hit[i].collider.transform;
+
+    //            Transform target = t.parent != null ? t.parent.parent : null;
+    //            if (target == null) continue;
+
+    //            Pipe pipe = target.GetComponent<Pipe>();
+    //            if (pipe != null && pipe != this)
+    //            {
+    //                Debug.Log($"{name} at {transform.position} connected to {pipe.name} at {pipe.transform.position}");
+    //                result.Add(pipe);
+    //            }
+    //        }
+    //    }
+
+    //    return result;
+    //}
+
+    public bool[] GetOpenings()
     {
-        List<Pipe> result = new List<Pipe>();
+        bool[] openings = new bool[4];
+        if (connectBoxes == null) return openings;
 
         foreach (var box in connectBoxes)
         {
-            RaycastHit2D[] hit = Physics2D.RaycastAll(box.transform.position, Vector2.zero, 0.1f);
-            //for (int i = 0; i < hit.Length; i++)
-            //{
-            //    result.Add(hit[i].collider.transform.parent.parent.GetComponent<Pipe>());
-            //}
-            for (int i = 0; i < hit.Length; i++)
+            Vector2 d = (Vector2)(box.position - transform.position); // 世界坐标差
+            // 归一化到主方向，容差避免微小偏移
+            if (Mathf.Abs(d.x) > Mathf.Abs(d.y))
             {
-                if (hit[i].collider == null) continue;
-
-                Transform t = hit[i].collider.transform;
-
-                Transform target = t.parent != null ? t.parent.parent : null;
-                if (target == null) continue;
-
-                Pipe pipe = target.GetComponent<Pipe>();
-                if (pipe != null && pipe != this)
-                {
-                    result.Add(pipe);
-                }
+                if (d.x > 0.05f) openings[1] = true;   // 右
+                else if (d.x < -0.05f) openings[3] = true; // 左
             }
+            else
+            {
+                if (d.y > 0.05f) openings[0] = true;   // 上
+                else if (d.y < -0.05f) openings[2] = true; // 下
+            }
+        }
+        return openings;
+    }
+
+    public List<Pipe> ConnectedPipes()
+    {
+        List<Pipe> result = new List<Pipe>();
+        PipeManager mgr = PipeManager.Instance;
+
+        // 找到自己在棋盘里的坐标
+        int row, col;
+        mgr.WorldToCell(transform.position, out row, out col);
+
+        bool[] myOpen = GetOpenings();
+
+        // 上
+        if (myOpen[0])
+        {
+            Pipe n = mgr.GetPipe(row + 1, col);
+            if (n != null && n.GetOpenings()[2]) result.Add(n);
+        }
+        // 右
+        if (myOpen[1])
+        {
+            Pipe n = mgr.GetPipe(row, col + 1);
+            if (n != null && n.GetOpenings()[3]) result.Add(n);
+        }
+        // 下
+        if (myOpen[2])
+        {
+            Pipe n = mgr.GetPipe(row - 1, col);
+            if (n != null && n.GetOpenings()[0]) result.Add(n);
+        }
+        // 左
+        if (myOpen[3])
+        {
+            Pipe n = mgr.GetPipe(row, col - 1);
+            if (n != null && n.GetOpenings()[1]) result.Add(n);
         }
 
         return result;
@@ -120,5 +184,12 @@ public class Pipe : MonoBehaviour
         if (currentPipe != null)
             currentPipe.transform.eulerAngles = new Vector3(0, 0, rotation * rotationMultiplier);
     }
+
+    public void RefreshInput()
+    {
+        if (currentPipe != null)
+            currentPipe.transform.eulerAngles = new Vector3(0, 0, rotation * 90);
+    }
+
 
 }
