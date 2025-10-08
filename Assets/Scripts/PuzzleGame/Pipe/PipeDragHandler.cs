@@ -118,7 +118,19 @@ public class PipeDragHandler : MonoBehaviour
                 if (startedFromBoard)
                 {
                     // 棋盘里拖出来的 → 放到固定位置
-                    transform.position = PipeManager.Instance.externalDropPos;
+                    //transform.position = PipeManager.Instance.externalDropPos;
+                    // 棋盘宽高
+                    float boardWidth = PipeManager.Instance.Level.Column * PipeManager.Instance.cellSize;
+                    float boardHeight = PipeManager.Instance.Level.Row * PipeManager.Instance.cellSize;
+
+                    // 在棋盘右下角，向右偏 2 格，向下偏 1 格
+                    float dropX = boardWidth + 2f * PipeManager.Instance.cellSize;
+                    float dropY = -1f * PipeManager.Instance.cellSize;
+
+                    transform.position = new Vector2(dropX, dropY);
+
+                    // 确保缩放一致
+                    transform.localScale = Vector3.one * PipeManager.Instance.cellSize;
                 }
                 else
                 {

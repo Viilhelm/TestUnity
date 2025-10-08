@@ -24,6 +24,7 @@ public class Pipe : MonoBehaviour
     public void Init(int pipe)
     {
         PipeType = pipe % 10;
+        transform.localScale = Vector3.one * PipeManager.Instance.cellSize;
         currentPipe = Instantiate(_pipePrefabs[PipeType], transform);
         currentPipe.transform.localPosition = Vector3.zero;
         if (PipeType == 1 || PipeType == 2)

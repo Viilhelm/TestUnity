@@ -387,7 +387,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 203.8, y: 159.7}
+  m_AnchoredPosition: {x: 342, y: 310}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &796781443
@@ -518,7 +518,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -12.6, y: 159.5}
+  m_AnchoredPosition: {x: -16, y: 304}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &891597479
@@ -1285,6 +1285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _level: {fileID: 11400000, guid: 8bd80b2a85ae1664088844f41b73744b, type: 2}
   _cellPrefab: {fileID: 8570145710800655449, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
+  cellSize: 10
   externalPipePrefab: {fileID: 8570145710800655449, guid: 585a5dba0757ca2408f13f1e93f312dc, type: 3}
   externalFixedType: 4
   externalDropPos: {x: 12, y: -2}

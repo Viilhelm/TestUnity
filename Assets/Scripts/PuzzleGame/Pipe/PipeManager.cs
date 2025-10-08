@@ -1,3 +1,4 @@
+using Common;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
@@ -9,6 +10,8 @@ public class PipeManager : MonoBehaviour
 
     [SerializeField] private NewScriptableObjectScript _level;
     [SerializeField] private Pipe _cellPrefab;
+    public float cellSize = 1f;   // 棋盘格子大小，默认 1
+
 
 
     private bool hasGameFinished;
@@ -35,9 +38,13 @@ public class PipeManager : MonoBehaviour
         {
             for (int j = 0; j < _level.Column; j++)
             {
-                Vector2 spawnPos = new Vector2(j + 0.5f, i + 0.5f);
+                //Vector2 spawnPos = new Vector2(j + 0.5f, i + 0.5f);
+                Vector2 spawnPos = new Vector2(j * cellSize + cellSize / 2f,
+                               i * cellSize + cellSize / 2f);
+
                 Pipe tempPipe = Instantiate(_cellPrefab);
                 tempPipe.transform.position = spawnPos;
+                tempPipe.transform.localScale = Vector3.one * cellSize;
                 tempPipe.Init(_level.Data[i * _level.Column + j]);
 
                 pipes[i, j] = tempPipe;
@@ -59,10 +66,14 @@ public class PipeManager : MonoBehaviour
 
         SpawnExternalPipe();
 
-        Camera.main.orthographicSize = Mathf.Max(_level.Row, _level.Column) + 2f;
+        //Camera.main.orthographicSize = Mathf.Max(_level.Row, _level.Column) + 2f;
         Vector3 cameraPos = Camera.main.transform.position;
-        cameraPos.x = _level.Column * 0.5f;
-        cameraPos.y = _level.Row * 0.5f;
+        //cameraPos.x = _level.Column * 0.5f;
+        //cameraPos.y = _level.Row * 0.5f;
+        cameraPos.x = _level.Column * cellSize * 0.5f;
+        cameraPos.y = _level.Row * cellSize * 0.5f;
+        Camera.main.orthographicSize = Mathf.Max(_level.Row, _level.Column) * cellSize * 0.5f + 3f * cellSize;
+
         Camera.main.transform.position = cameraPos;
 
 
@@ -200,8 +211,11 @@ public class PipeManager : MonoBehaviour
     public void SpawnExternalPipe()
     {
         // 计算生成位置：棋盘右边居中
-        float spawnX = _level.Column + 2f;      // 棋盘宽度右边再偏移 2 个单位
-        float spawnY = _level.Row * 0.5f;       // 棋盘高度的一半（居中）
+        //float spawnX = _level.Column + 2f;      // 棋盘宽度右边再偏移 2 个单位
+        //float spawnY = _level.Row * 0.5f;       // 棋盘高度的一半（居中）
+        float spawnX = _level.Column * cellSize + 2f * cellSize;
+        float spawnY = _level.Row * cellSize * 0.5f;
+
 
         Vector2 spawnPos = new Vector2(spawnX, spawnY);
 
@@ -210,6 +224,8 @@ public class PipeManager : MonoBehaviour
 
         int pipeType = Mathf.Clamp(externalFixedType, 0, 6); // 固定样式
         externalPipe.Init(pipeType);
+        externalPipe.transform.localScale = Vector3.one * cellSize;
+
         externalPipe.IsDraggable = true;
     }
 
@@ -234,7 +250,9 @@ public class PipeManager : MonoBehaviour
 
         // 在目标格生成一个“正式 cell”
         Pipe newCell = Instantiate(_cellPrefab);
-        newCell.transform.position = new Vector3(col + 0.5f, row + 0.5f, 0);
+        //newCell.transform.position = new Vector3(col + 0.5f, row + 0.5f, 0);
+        newCell.transform.position = GetCellCenter(row, col);
+
         newCell.Init(type);          // 按管型初始化
         newCell.SetRotationIndex(rot); // 还原旋转
         newCell.IsDraggable = false;   // 放回棋盘后不再可拖
@@ -258,13 +276,19 @@ public class PipeManager : MonoBehaviour
 
     public void WorldToCell(Vector3 worldPos, out int row, out int col)
     {
-        row = Mathf.RoundToInt(worldPos.y - 0.5f);
-        col = Mathf.RoundToInt(worldPos.x - 0.5f);
+        //row = Mathf.RoundToInt(worldPos.y - 0.5f);
+        //col = Mathf.RoundToInt(worldPos.x - 0.5f);
+        row = Mathf.RoundToInt((worldPos.y - cellSize / 2f) / cellSize);
+        col = Mathf.RoundToInt((worldPos.x - cellSize / 2f) / cellSize);
+
     }
 
     public Vector2 GetCellCenter(int row, int col)
     {
-        return new Vector2(col + 0.5f, row + 0.5f);
+        //return new Vector2(col + 0.5f, row + 0.5f);
+        return new Vector2(col * cellSize + cellSize / 2f,
+                   row * cellSize + cellSize / 2f);
+
     }
 
     public Vector2 externalDropPos = new Vector2(12, -2);
@@ -275,6 +299,8 @@ public class PipeManager : MonoBehaviour
             return pipes[row, col];
         return null;
     }
+
+    public NewScriptableObjectScript Level => _level;
 
 
 
