@@ -21,7 +21,7 @@ public class Pipe : MonoBehaviour
     private const int maxRotation = 3;
     private const int rotationMultiplier = 90;
 
-    private bool backgroundDetached = false;
+    //private bool backgroundDetached = false;
 
     public void Init(int pipe)
     {
