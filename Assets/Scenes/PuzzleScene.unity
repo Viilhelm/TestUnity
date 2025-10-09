@@ -1284,7 +1284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _level: {fileID: 11400000, guid: 8bd80b2a85ae1664088844f41b73744b, type: 2}
-  _cellPrefab: {fileID: 8570145710800655449, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
+  _cellPrefab: {fileID: 254791954456301943, guid: 213e7f1e450a47e4580d1182e064cf18, type: 3}
   cellSize: 10
   externalPipePrefab: {fileID: 8570145710800655449, guid: 585a5dba0757ca2408f13f1e93f312dc, type: 3}
   externalFixedType: 4

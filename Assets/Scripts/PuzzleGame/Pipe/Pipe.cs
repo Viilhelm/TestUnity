@@ -21,10 +21,12 @@ public class Pipe : MonoBehaviour
     private const int maxRotation = 3;
     private const int rotationMultiplier = 90;
 
+    private bool backgroundDetached = false;
+
     public void Init(int pipe)
     {
         PipeType = pipe % 10;
-        transform.localScale = Vector3.one * PipeManager.Instance.cellSize;
+        //transform.localScale = Vector3.one * PipeManager.Instance.cellSize;
         currentPipe = Instantiate(_pipePrefabs[PipeType], transform);
         currentPipe.transform.localPosition = Vector3.zero;
         if (PipeType == 1 || PipeType == 2)
@@ -192,5 +194,36 @@ public class Pipe : MonoBehaviour
             currentPipe.transform.eulerAngles = new Vector3(0, 0, rotation * 90);
     }
 
+    //void Start()
+    //{
+    //    // 保证只执行一次
+    //    if (!backgroundDetached)
+    //    {
+    //        DetachBackground();
+    //        backgroundDetached = true;
+    //    }
+    //}
+
+    ///// <summary>
+    ///// 将背景SpriteRenderer从Pipe对象中分离，让它留在棋盘上
+    ///// </summary>
+    //private void DetachBackground()
+    //{
+    //    Transform bg = transform;
+
+    //    if (bg == null)
+    //    {
+           
+    //    }
+
+    //    if (bg != null)
+    //    {
+    //        // 把背景移到PipeManager的根节点下（这样背景不会随Pipe移动）
+    //        bg.SetParent(PipeManager.Instance.transform);
+
+    //        // 保留它在场景中的世界坐标
+    //        bg.position = transform.position;
+    //    }
+    //}
 
 }

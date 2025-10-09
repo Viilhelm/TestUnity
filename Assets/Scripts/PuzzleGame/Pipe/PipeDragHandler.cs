@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PipeDragHandler : MonoBehaviour
@@ -67,19 +68,30 @@ public class PipeDragHandler : MonoBehaviour
                 clearedFromBoard = false;
 
                 // 如果从棋盘拖起 → 清空格子 + 隐藏背景
+                //if (startedFromBoard && !clearedFromBoard)
+                //{
+                //    PipeManager.Instance.ClearPipeAt(row, col);
+                //    clearedFromBoard = true;
+
+                //    // 找到背景子物体并隐藏
+                //    Transform background = transform;
+                //    SpriteRenderer sr = background.GetComponent<SpriteRenderer>();
+                //    if (sr != null) sr.enabled = false;
+
+                //    pipe.IsFilled = false;
+                //    pipe.UpdateFilled();
+                //}
+                // 如果从棋盘拖起 → 清空格子（但保留背景）
                 if (startedFromBoard && !clearedFromBoard)
                 {
                     PipeManager.Instance.ClearPipeAt(row, col);
                     clearedFromBoard = true;
 
-                    // 找到背景子物体并隐藏
-                    Transform background = transform;
-                    SpriteRenderer sr = background.GetComponent<SpriteRenderer>();
-                    if (sr != null) sr.enabled = false;
-
+                    // 不再隐藏背景
                     pipe.IsFilled = false;
                     pipe.UpdateFilled();
                 }
+
             }
         }
 
@@ -109,34 +121,40 @@ public class PipeDragHandler : MonoBehaviour
             {
 
                 PipeManager.Instance.PlacePipeAt(pipe, row, col);
+                //// 重新显示背景（之前拖出时隐藏的）
+                Transform background = transform;
+                SpriteRenderer sr = background.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                    sr.enabled = true;
+
                 if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
                     _ = PipeManager.Instance.StartCoroutine(PipeManager.Instance.ShowHintWrapper());
             }
             else
             {
 
-                if (startedFromBoard)
-                {
-                    // 棋盘里拖出来的 → 放到固定位置
-                    //transform.position = PipeManager.Instance.externalDropPos;
-                    // 棋盘宽高
-                    float boardWidth = PipeManager.Instance.Level.Column * PipeManager.Instance.cellSize;
-                    float boardHeight = PipeManager.Instance.Level.Row * PipeManager.Instance.cellSize;
+                //if (startedFromBoard)
+                //{
+                //    // 棋盘里拖出来的 → 放到固定位置
+                //    //transform.position = PipeManager.Instance.externalDropPos;
+                //    // 棋盘宽高
+                //    float boardWidth = PipeManager.Instance.Level.Column * PipeManager.Instance.cellSize;
+                //    float boardHeight = PipeManager.Instance.Level.Row * PipeManager.Instance.cellSize;
 
-                    // 在棋盘右下角，向右偏 2 格，向下偏 1 格
-                    float dropX = boardWidth + 2f * PipeManager.Instance.cellSize;
-                    float dropY = -1f * PipeManager.Instance.cellSize;
+                //    // 在棋盘右下角，向右偏 2 格，向下偏 1 格
+                //    float dropX = boardWidth + 2f * PipeManager.Instance.cellSize;
+                //    float dropY = -1f * PipeManager.Instance.cellSize;
 
-                    transform.position = new Vector2(dropX, dropY);
+                //    transform.position = new Vector2(dropX, dropY);
 
-                    // 确保缩放一致
-                    transform.localScale = Vector3.one * PipeManager.Instance.cellSize;
-                }
-                else
-                {
-                    // 外部候选 pipe → 回到自己的起始位置
-                    transform.position = startPosition;
-                }
+                //    // 确保缩放一致
+                //    transform.localScale = Vector3.one * PipeManager.Instance.cellSize;
+                //}
+                //else
+                //{
+                //    // 外部候选 pipe → 回到自己的起始位置
+                //    transform.position = startPosition;
+                //}
 
             }
 

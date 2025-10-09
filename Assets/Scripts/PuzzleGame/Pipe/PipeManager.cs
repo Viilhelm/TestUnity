@@ -9,7 +9,7 @@ public class PipeManager : MonoBehaviour
     public static PipeManager Instance;
 
     [SerializeField] private NewScriptableObjectScript _level;
-    [SerializeField] private Pipe _cellPrefab;
+    [SerializeField] private GameObject _cellPrefab;
     public float cellSize = 1f;   // 棋盘格子大小，默认 1
 
 
@@ -42,9 +42,16 @@ public class PipeManager : MonoBehaviour
                 Vector2 spawnPos = new Vector2(j * cellSize + cellSize / 2f,
                                i * cellSize + cellSize / 2f);
 
-                Pipe tempPipe = Instantiate(_cellPrefab);
-                tempPipe.transform.position = spawnPos;
-                tempPipe.transform.localScale = Vector3.one * cellSize;
+                //Pipe tempPipe = Instantiate(_cellPrefab);
+                GameObject cellGO = Instantiate(_cellPrefab, spawnPos, Quaternion.identity);
+                //Pipe tempPipe = cellGO.GetComponentInChildren<Pipe>();
+
+                //tempPipe.transform.position = spawnPos;
+                //tempPipe.transform.localScale = Vector3.one * cellSize;
+                //tempPipe.Init(_level.Data[i * _level.Column + j]);
+                cellGO.transform.localScale = Vector3.one * cellSize;
+
+                Pipe tempPipe = cellGO.GetComponentInChildren<Pipe>();
                 tempPipe.Init(_level.Data[i * _level.Column + j]);
 
                 pipes[i, j] = tempPipe;
@@ -238,35 +245,61 @@ public class PipeManager : MonoBehaviour
     // 判断格子是否空
     public bool IsEmptyAt(int row, int col)
     {
+        if (!IsInsideBoard(row, col))
+            return false;
         return !hasPipe[row, col];
     }
 
     // 把管子放进某个格子
+    //public void PlacePipeAt(Pipe dragged, int row, int col)
+    //{
+    //    // 记录被拖动物件的管型与朝向
+    //    int type = dragged.PipeType;
+    //    int rot = dragged.GetRotationIndex();
+
+    //    // 在目标格生成一个“正式 cell”
+    //    Pipe newCell = Instantiate(_cellPrefab);
+    //    //newCell.transform.position = new Vector3(col + 0.5f, row + 0.5f, 0);
+    //    newCell.transform.position = GetCellCenter(row, col);
+
+    //    newCell.Init(type);          // 按管型初始化
+    //    newCell.SetRotationIndex(rot); // 还原旋转
+    //    newCell.IsDraggable = false;   // 放回棋盘后不再可拖
+
+    //    // 写回棋盘数据
+    //    pipes[row, col] = newCell;
+    //    hasPipe[row, col] = true;
+
+    //    // 销毁“只有管子”的外部件
+    //    Destroy(dragged.gameObject);
+
+    //    if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
+    //        _ = StartCoroutine(ShowHint());
+    //}
     public void PlacePipeAt(Pipe dragged, int row, int col)
     {
-        // 记录被拖动物件的管型与朝向
-        int type = dragged.PipeType;
-        int rot = dragged.GetRotationIndex();
+        // 安全检查
+        if (!IsInsideBoard(row, col))
+            return;
 
-        // 在目标格生成一个“正式 cell”
-        Pipe newCell = Instantiate(_cellPrefab);
-        //newCell.transform.position = new Vector3(col + 0.5f, row + 0.5f, 0);
-        newCell.transform.position = GetCellCenter(row, col);
+        // 将拖动的 pipe 移动到棋盘格中心
+        dragged.transform.position = GetCellCenter(row, col);
 
-        newCell.Init(type);          // 按管型初始化
-        newCell.SetRotationIndex(rot); // 还原旋转
-        newCell.IsDraggable = false;   // 放回棋盘后不再可拖
+        // 保持缩放一致
+        dragged.transform.localScale = Vector3.one * cellSize;
 
-        // 写回棋盘数据
-        pipes[row, col] = newCell;
+        // 保持可拖拽
+        dragged.IsDraggable = true;
+
+        // 更新棋盘数据
+        pipes[row, col] = dragged;
         hasPipe[row, col] = true;
 
-        // 销毁“只有管子”的外部件
-        Destroy(dragged.gameObject);
-
-        if (PipeManager.Instance != null && PipeManager.Instance.isActiveAndEnabled)
-            _ = StartCoroutine(ShowHint());
+        // 重新检测填充状态
+        if (isActiveAndEnabled)
+            _ = StartCoroutine(ShowHintWrapper());
     }
+
 
     public void ClearPipeAt(int row, int col)
     {
