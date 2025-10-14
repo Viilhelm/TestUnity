@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Common;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -140,7 +141,49 @@ public class GameManager : MonoBehaviour
             Invoke(nameof(GoToPuzzleScene), 1f);
 
         }
+
+
     }
 
+    public enum GameStage
+    {
+        Diagnosis,   // 扫描诊断阶段
+        Repair,      // 拆螺丝、修理阶段
+        Verification // 测试（扫描确认）阶段
+    }
+
+    public GameStage CurrentStage = GameStage.Diagnosis;
+
+    // 由拼图场景回vectroyPanel后调用
+    public void EnterVerification()
+    {
+        CurrentStage = GameStage.Verification;
+        ScannerTool.Instance.SetModeVerification();        // 扫描仪切到验证模式
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (PuzzleCompleted && scene.name == "MainScene")
+        {
+            Debug.Log("拼图修复完成，进入测试阶段");
+            
+            CurrentStage = GameStage.Verification;
+
+           
+            // 启用扫描仪验证模式
+            //if (ScannerTool.Instance != null)
+                //ScannerTool.Instance.SetModeVerification();
+        }
+    }
 
 }

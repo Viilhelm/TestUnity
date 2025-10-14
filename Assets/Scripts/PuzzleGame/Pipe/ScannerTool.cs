@@ -56,7 +56,7 @@ public class ScannerTool : MonoBehaviour
         if (scannerIcon != null)
             scannerIcon.position = Input.mousePosition;
 
-        // 检测鼠标是否靠近异常区域
+        // 检测鼠标是否靠近异常区域                                        
         if (!detected)
         {
             for (int i = 0; i < scanPoints.Length; i++)
@@ -67,16 +67,30 @@ public class ScannerTool : MonoBehaviour
                 Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, rt.position);
                 float dist = Vector2.Distance(screenPos, Input.mousePosition);
 
-
                 if (dist < detectionRadius)
                 {
-                    if (i == brokenPartIndex)
+
+                    if (mode == ScanMode.Diagnosis && i == brokenPartIndex)
                     {
-                        Debug.Log("检测到异常部位！");
+                        if (i == brokenPartIndex)
+                        {
+                            Debug.Log("检测到异常部位！");
+                            detected = true;
+                            StartCoroutine(ShowError(scanPoints[i]));
+                            DeactivateScanner();
+                            // 激活螺丝刀
+                            if (ToolManager.Instance != null)
+                                ToolManager.Instance.screwdriverActive = true;
+                            break;
+                        }
+
+                    }
+                    if (mode == ScanMode.Verification)
+                    {
+                        Debug.Log("运转正常，修理成功！");
                         detected = true;
-                        StartCoroutine(ShowError(scanPoints[i]));
+                        StartCoroutine(ShowSuccess(scanPoints[i]));
                         DeactivateScanner();
-                        ToolManager.Instance.screwdriverActive = true;
                         break;
                     }
                 }
@@ -103,4 +117,39 @@ public class ScannerTool : MonoBehaviour
         }
         img.color = baseColor;
     }
+
+    public enum ScanMode { Diagnosis, Verification }
+
+    public ScanMode mode = ScanMode.Diagnosis;
+
+
+    public void SetModeVerification()
+    {
+        mode = ScanMode.Verification;
+        brokenPartIndex = -1;        // 清空异常索引，防止残留
+        detected = false;            // 重置检测状态
+        ActivateScanner();
+    }
+
+    private IEnumerator ShowSuccess(GameObject point)
+    {
+        GameObject hint = Instantiate(hintPrefab, point.transform.parent);
+        hint.GetComponentInChildren<TextMeshProUGUI>().text = "运转正常 ";
+        hint.transform.position = point.transform.position;
+
+        Image img = point.GetComponent<Image>();
+        if (img == null) yield break;
+
+        Color baseColor = img.color;
+        Color flashColor = Color.green;
+
+        for (int i = 0; i < 6; i++)
+        {
+            img.color = (i % 2 == 0) ? flashColor : baseColor;
+            yield return new WaitForSeconds(0.2f);
+        }
+        img.color = baseColor;
+    }
+
+
 }
