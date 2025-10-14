@@ -125,6 +125,22 @@ public class GameManager : MonoBehaviour
     public bool PuzzleCompleted = false;
     public bool HasPlayedPuzzle = false;
 
+    public int totalScrews = 4;
+    private int removedCount = 0;
+
+    public void OnScrewRemoved()
+    {
+        removedCount++;
+        Debug.Log($"已拆下 {removedCount}/{totalScrews}");
+
+        if (removedCount >= totalScrews)
+        {
+            Debug.Log("所有螺丝已拆下，进入内部结构...");
+            SelectedPuzzle = "Pipe"; 
+            Invoke(nameof(GoToPuzzleScene), 1f);
+
+        }
+    }
 
 
 }
