@@ -1,18 +1,18 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Screw : MonoBehaviour, IPointerClickHandler
+public class Screw : MonoBehaviour
 {
     private bool removed = false;
     private float rotationSpeed = 400f; // 旋转速度
     private float currentAngle = 0f;
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void StartUnscrew()
     {
-        Debug.Log($"{name} 被点击了");
-        if (removed || !ToolManager.Instance.screwdriverActive) return;
+        if (removed) return;
         StartCoroutine(RemoveScrew());
     }
+
 
     private System.Collections.IEnumerator RemoveScrew()
     {
@@ -30,7 +30,7 @@ public class Screw : MonoBehaviour, IPointerClickHandler
 
         // 模拟“卸下”效果（螺丝下沉 + 消失）
         Vector3 startPos = transform.localPosition;
-        Vector3 endPos = startPos + new Vector3(0, -50, 0);
+        Vector3 endPos = startPos + new Vector3(0, -25, 0);
 
         float t = 0f;
         while (t < 1f)
